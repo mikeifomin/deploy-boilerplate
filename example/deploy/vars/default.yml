@@ -1,1 +1,3 @@
-root_dir_apps: /root/apps
+root_apps_dir:            /root/apps
+root_balancer_dir: "{{root_apps_dir}}/balancer"
+conf_balancer_dir:      "{{root_balancer_dir}}/conf.d"
