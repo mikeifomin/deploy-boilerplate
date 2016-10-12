@@ -1,9 +1,15 @@
 # Component
 
+Multiple service on single server
+
 ansible
 docker
 node
 mongodb
+
+
+vitrual hosts via docker-compose and `docker network`
+
 
 ## parts
 
@@ -15,3 +21,8 @@ mongodb
  6. green blue deployment
  7. monitoring
  4. docker swarm
+
+
+### problems
+
+ 1. security

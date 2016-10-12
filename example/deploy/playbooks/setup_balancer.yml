@@ -1,0 +1,57 @@
+---
+
+- hosts: main
+  remote_user: root
+  vars_files:
+    - ../vars/default.yml
+    - ../vars/credentials.yml
+
+  tasks:
+    - set_fact:
+        root_dir: "{{root_dir_apps}}"
+
+    - name: Create directories
+      file: "path={{root_dir}}/conf.d state=directory"
+
+    - name: Create directories
+      file: "path={{root_dir}}/logs state=directory"
+
+    - name: Gen nginx.conf
+      template:
+          src: ../templates/nginx.jinja2.conf
+          dest: "{{root_dir}}/nginx.conf"
+
+    - name: run balancer in docker-compose
+      docker_service:
+        state: present
+        recreate: always
+        project_name: balancer
+        definition:
+          version: '2'
+          services:
+            nginx:
+              image: nginx
+              restart: always
+              container_name: balancer
+              ports:
+                - "80:80"
+                - "443:443"
+              volumes:
+                - "{{root_dir}}/conf.d/:/etc/nginx/conf.d:ro"
+                - "{{root_dir}}/nginx.conf:/etc/nginx/nginx.conf:ro"
+                - "{{root_dir}}/logs:/var/log/nginx"
+              networks:
+                - network
+          networks:
+            # `balancer_network` will create
+            # so containers can join to this network for availabilty from nginx
+            network:
+    - assert:
+        that:
+          - "nginx.balancer.state.running"
+
+    # TODO: add timeout
+    # check for container is not resttarting
+    # check logs
+
+#
