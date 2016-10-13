@@ -11,6 +11,9 @@
     - name: Create directories for common logs and errors
       file: "path={{root_balancer_dir}}/logs state=directory"
 
+    - name: Create acme/.well-known directory
+      file: "path={{acme_dir}}/.well-known state=directory"
+
     - name: Sync custom letsencrypt_worker app
       synchronize:
           src: ../letsencrypt/
