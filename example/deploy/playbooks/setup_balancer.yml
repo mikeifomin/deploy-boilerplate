@@ -44,7 +44,7 @@
                 - "{{root_balancer_dir}}/letsencrypt/:/etc/letsencrypt/:ro"
               networks:
                 - network
-            letsencrypt_worker:
+            letsencrypt:
               container_name: letsencrypt
               build: "{{root_balancer_dir}}/letsencrypt-code"
               restart: always
