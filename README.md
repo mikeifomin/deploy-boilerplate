@@ -2,10 +2,11 @@
 
 Multiple service on single server
 
-ansible
-docker
-node
-mongodb
+ansible 2.1+
+ubuntu 16.04
+docker 1.12+
+node 6.7+
+mongodb 3.2+
 
 
 vitrual hosts via docker-compose and `docker network`

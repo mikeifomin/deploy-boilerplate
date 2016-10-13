@@ -22,6 +22,8 @@
       synchronize:
         src: ../../server/
         dest: "{{root_dir}}/code/"
+        rsync_opts:
+          - exclude='node_modules'
 
     - name: Run docker-compose
       docker_service:
@@ -38,6 +40,7 @@
             node:
               build: "{{root_dir}}/code"
               restart: always
+              
           # this stuff garantee that balancer container will have
           # access to the current containers
           networks:
@@ -117,4 +120,4 @@
     - name: Reload balancer
       command: docker exec balancer nginx -s reload
 
-    # TODO: waiting for url  
+    # TODO: waiting for url
