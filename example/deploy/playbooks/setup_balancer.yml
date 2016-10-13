@@ -8,26 +8,20 @@
 
   tasks:
 
-    - name: Create directories
+    - name: Create directories for common logs and errors
       file: "path={{root_balancer_dir}}/logs state=directory"
 
-    - name: Create directories
-      file: "path={{root_balancer_dir}}/certs-live state=directory"
-
-    - name: Create acme directory
-      file: "path={{acme_dir}}/.well-known state=directory"
-
-    - name: Sync letsencrypt
+    - name: Sync custom letsencrypt_worker app
       synchronize:
           src: ../letsencrypt/
           dest: "{{root_balancer_dir}}/letsencrypt-code/"
 
-    - name: Gen nginx.conf
+    - name: Gen main nginx.conf
       template:
           src: ../templates/nginx.jinja2.conf
           dest: "{{root_balancer_dir}}/nginx.conf"
 
-    - name: run balancer in docker-compose
+    - name: Run balancer and letsencrypt_worker in docker-compose
       docker_service:
         state: present
         recreate: always
@@ -50,7 +44,7 @@
                 - "{{root_balancer_dir}}/letsencrypt/:/etc/letsencrypt/:ro"
               networks:
                 - network
-            letsecrypt:
+            letsencrypt_worker:
               container_name: letsencrypt
               build: "{{root_balancer_dir}}/letsencrypt-code"
               restart: always
