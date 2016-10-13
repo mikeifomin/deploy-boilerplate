@@ -18,12 +18,15 @@
     - name: Create directory
       file: "path={{root_dir}}/code state=directory"
 
+    - name: Create directory
+      file: "path={{root_dir}}/acme state=directory"
+
     - name: Sync app code
       synchronize:
         src: ../../server/
         dest: "{{root_dir}}/code/"
-        rsync_opts:
-          - exclude='node_modules'
+        # rsync_opts:
+        #   - exclude='node_modules'
 
     - name: Run docker-compose
       docker_service:
@@ -40,7 +43,7 @@
             node:
               build: "{{root_dir}}/code"
               restart: always
-              
+
           # this stuff garantee that balancer container will have
           # access to the current containers
           networks:
@@ -62,6 +65,7 @@
     # rename containers with old prefix
     # update upstream
 
+
     - name: Gen nginx upstream files
       copy:
         dest: "{{conf_balancer_dir}}/{{app_name}}.upstream.conf"
@@ -73,33 +77,10 @@
             {% endfor %}
           }
 
-    - name: Gen nginx conf file
+    - name: Gen nginx conf file (with acme .well-known)
       copy:
         dest: "{{conf_balancer_dir}}/{{app_name}}.conf"
         content: |
-
-          # server {
-          #   listen 443 ssl;
-          #   server_name  {{domain_main}};
-            # Dynamic handler for issuing or returning certs for SNI domains.
-            # ssl_certificate_by_lua_block {
-            #   auto_ssl:ssl_certificate()
-            # }
-
-            # You must still define a static ssl_certificate file for nginx to start.
-            #
-            # You may generate a self-signed fallback with:
-            #
-            # openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
-            #   -subj '/CN=sni-support-required-for-valid-ssl' \
-            #   -keyout /etc/ssl/resty-auto-ssl-fallback.key \
-            #   -out /etc/ssl/resty-auto-ssl-fallback.crt
-          #   ssl_certificate /etc/ssl/resty-auto-ssl-fallback.crt;
-          #   ssl_certificate_key /etc/ssl/resty-auto-ssl-fallback.key;
-          #   location / {
-          #     proxy_pass      http://upstream_{{app_name}};
-          #   }
-          # }
           server {
             listen       80;
             server_name  {{domain_main}};
@@ -110,14 +91,79 @@
             #   root    /var/www/virtual/big.server.com/htdocs;
             #   expires 30d;
             # }
-
+            location ~ /.well-known {
+                # allow all;
+                # try_files $uri $uri/index.html;
+                root {{in_container_acme_dir}};
+                autoindex on;
+            }
             location / {
               # see {{app_name}}.upstream.conf file
               proxy_pass      http://{{app_name}};
             }
           }
 
+
     - name: Reload balancer
       command: docker exec balancer nginx -s reload
+
+    # TODO: waiting for ssl  certs exists
+    - name: Create request-domains.txt
+      copy:
+        dest: "{{root_dir}}/acme/request-domains.txt"
+        content: |
+            {{domain_main}}
+
+    - name: Ask letsencrypt
+      command: docker restart letsencrypt
+
+    #
+    # - name: Gen nginx conf file
+    #   copy:
+    #     dest: "{{conf_balancer_dir}}/{{app_name}}.ssl.conf"
+    #     content: |
+    #       server {
+    #
+    #         listen 443 ssl http2 default_server;
+    #         listen [::]:443 ssl http2 default_server;
+    #         server_name {{domain_main}};
+    #
+    #         ssl_certificate /etc/letsencrypt/live/{{domain_main}}/fullchain.pem;
+    #         ssl_certificate_key /etc/letsencrypt/live/{{domain_main}}/privkey.pem;
+    #
+    #         # TODO: move to
+    #         #include snippets/ssl-params.conf;
+    #
+    #         # from https://cipherli.st/
+    #         # and https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+    #
+    #         ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    #         ssl_prefer_server_ciphers on;
+    #         ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+    #         ssl_ecdh_curve secp384r1;
+    #         ssl_session_cache shared:SSL:10m;
+    #         ssl_session_tickets off;
+    #         ssl_stapling on;
+    #         ssl_stapling_verify on;
+    #         resolver 8.8.8.8 8.8.4.4 valid=300s;
+    #         resolver_timeout 5s;
+    #         # Disable preloading HSTS for now.  You can use the commented out header line that includes
+    #         # the "preload" directive if you understand the implications.
+    #         #add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+    #
+    #         # TODO: implement `openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048`
+    #         # add_header Strict-Transport-Security "max-age=63072000; includeSubdomains";
+    #         # add_header X-Frame-Options DENY;
+    #         # add_header X-Content-Type-Options nosniff;
+    #         #
+    #         # ssl_dhparam /etc/ssl/certs/dhparam.pem;
+    #
+    #         location / {
+    #             proxy_pass      http://upstream_{{app_name}};
+    #         }
+    #       }
+
+
+
 
     # TODO: waiting for url

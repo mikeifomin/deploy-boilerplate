@@ -11,6 +11,17 @@
     - name: Create directories
       file: "path={{root_balancer_dir}}/logs state=directory"
 
+    - name: Create directories
+      file: "path={{root_balancer_dir}}/certs-live state=directory"
+
+    - name: Create acme directory
+      file: "path={{acme_dir}}/.well-known state=directory"
+
+    - name: Sync letsencrypt
+      synchronize:
+          src: ../letsencrypt/
+          dest: "{{root_balancer_dir}}/letsencrypt-code/"
+
     - name: Gen nginx.conf
       template:
           src: ../templates/nginx.jinja2.conf
@@ -35,8 +46,18 @@
                 - "{{conf_balancer_dir}}/:/etc/nginx/conf.d:ro"
                 - "{{root_balancer_dir}}/nginx.conf:/etc/nginx/nginx.conf:ro"
                 - "{{root_balancer_dir}}/logs:/var/log/nginx"
+                - "{{acme_dir}}:{{in_container_acme_dir}}"
+                - "{{root_balancer_dir}}/letsencrypt/:/etc/letsencrypt/:ro"
               networks:
                 - network
+            letsecrypt:
+              container_name: letsencrypt
+              build: "{{root_balancer_dir}}/letsencrypt-code"
+              restart: always
+              volumes:
+                - "{{root_apps_dir}}:/apps"
+                - "{{acme_dir}}:{{in_container_acme_dir}}"
+                - "{{root_balancer_dir}}/letsencrypt/:/etc/letsencrypt/"
           networks:
             # `balancer_network` will create
             # so containers can join to this network for availabilty from nginx
@@ -44,6 +65,13 @@
     - assert:
         that:
           - "nginx.balancer.state.running"
+    # - expect:
+    #     command: openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+    #     responses:
+    # - name: Generate Strong Diffie-Hellman Group
+    #   command:
+    #   # args:
+      #   removes: /etc/ssl/certs/dhparam.pem
 
     # TODO: add timeout
     # check for container is not resttarting
