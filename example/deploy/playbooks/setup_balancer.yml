@@ -52,6 +52,8 @@
                 - "{{root_apps_dir}}:/apps"
                 - "{{acme_dir}}:{{in_container_acme_dir}}"
                 - "{{root_balancer_dir}}/letsencrypt/:/etc/letsencrypt/"
+              environment:
+                - "EMAIL={{letsencrypt_email}}"
           networks:
             # `balancer_network` will create
             # so containers can join to this network for availabilty from nginx

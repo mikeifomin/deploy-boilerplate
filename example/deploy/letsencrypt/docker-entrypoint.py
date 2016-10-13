@@ -29,7 +29,7 @@ while True:
                 '-n',
                 '-t',
                 '--webroot',
-                '-m','mikeifomin@gmail.com',
+                '-m',os.environ['EMAIL'],
                 '-w','/acme'
                 ]
             for domain in domains:
