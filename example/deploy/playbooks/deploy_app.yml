@@ -6,15 +6,13 @@
     - ../vars/default.yml
     - ../vars/credentials.yml
 
-  tasks:
-
+  vars:
+    app_name: app
     # TODO: add list of domains
-    - set_fact:
-        app_name: app
-        domain_main: dev.mif.io
+    domain_main: dev.mif.io
+    root_dir: "{{root_apps_dir}}/{{app_name}}"
 
-    - set_fact:
-        root_dir: "{{root_apps_dir}}/{{app_name}}"
+  tasks:
 
     - name: Create directory for an application code
       file: "path={{root_dir}}/code state=directory"
