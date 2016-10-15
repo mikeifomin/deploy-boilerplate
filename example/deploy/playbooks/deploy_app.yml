@@ -24,8 +24,12 @@
       synchronize:
         src: ../../server/
         dest: "{{root_dir}}/code/"
-        # rsync_opts:
-        #   - exclude='node_modules'
+        # http://unix.stackexchange.com/questions/2161/rsync-filter-copying-one-pattern-only/2503#2503
+        rsync_opts:
+          - "--include='src/***'"
+          - "--include='Dockerfile'"
+          - "--include='package.json'"
+          - "--exclude='*'"
 
     - name: Run docker-compose
       docker_service:
