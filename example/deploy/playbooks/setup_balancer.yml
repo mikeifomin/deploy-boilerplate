@@ -65,13 +65,11 @@
       docker_service:
         state: present
         recreate: always
-        # project_name: balancer
         project_src: "{{root_balancer_dir}}"
 
     - assert:
         that:
           - "nginx.balancer.state.running"
-
 
     - name: Add common ssl nginx snippets
       copy:
