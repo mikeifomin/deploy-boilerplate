@@ -122,7 +122,7 @@
 
             ssl_certificate /etc/letsencrypt/live/{{domain_main}}/fullchain.pem;
             ssl_certificate_key /etc/letsencrypt/live/{{domain_main}}/privkey.pem;
-            include /etc/ngins/snippets/ssl-params.conf;
+            include /etc/nginx/snippets/ssl-params.conf;
 
             location / {
                 proxy_pass      http://{{app_name}};
