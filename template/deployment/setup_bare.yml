@@ -1,0 +1,41 @@
+---
+- hosts: all
+  gather_facts: no
+  pre_tasks:
+    - raw: rm -rf /var/lib/dpkg/lock
+    - raw: apt-get update -qq
+    - raw: apt-get install -qq python-minimal
+
+- hosts: all
+  roles:
+    - role: angstwad.docker_ubuntu
+  vars_files:
+    - vars.yml
+    - vars.credentials.yml
+ 
+  tasks:
+    - apt: name={{item}}
+      with_items:
+        - tmux
+        - curl
+        - tree
+        - htop
+        - mosh
+        - vim
+        - zsh
+        - git
+        - software-properties-common
+        - jq
+# fix until ansible will not update docker_service        
+#   - pip: name=docker state=absent
+#   - pip: name=docker-py state=absent
+#   - pip: name=docker
+ 
+    - command: "docker login -p {{registry_pass}} -u {{registry_user}} registry.mif.io"
+    - copy:
+        dest: "/etc/docker/daemon.json"
+        content: |
+          {"experimental":true}
+    - service: 
+        name: docker
+        state: restarted

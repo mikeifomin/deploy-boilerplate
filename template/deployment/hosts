@@ -1,0 +1,5 @@
+[all:vars]
+ansible_python_interpreter=/usr/bin/python2.7
+ansible_user=root
+[main]
+swarm1.mif.io

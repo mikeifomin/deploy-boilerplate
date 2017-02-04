@@ -1,0 +1,13 @@
+project_name: app
+remote_root: /root/
+services:
+  - dir: /meteor
+    domain: swarm1.mif.io
+    global_MONGO_URL_db_name: myMeteor
+    global_REDIS_URL_db_name: 0
+    envs:
+      
+abs_path: "{{playbook_dir | dirname}}"
+
+default_placement: {"constraints":["node.hostname == swarm2"]}
+

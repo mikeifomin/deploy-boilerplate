@@ -1,0 +1,27 @@
+---
+  - set_fact: build_path="{{abs_path}}/builds/{{service_name}}/{{version}}/"
+  - set_fact: meteor_settings={{item.get('meteor_settings')}} 
+  - debug: msg={{source_path}}
+  - command: "meteor build --architecture=os.linux.x86_64 {{build_path}}"
+    args: 
+      chdir: "{{source_path}}"
+  - unarchive: src="{{build_path}}/meteor.tar.gz" dest="{{build_path}}"
+  - file: state=absent path="{{build_path}}/meteor.tar.gz"
+  - copy: dest="{{build_path}}/settings.json" content="{{meteor_settings | to_nice_json }}"
+  - copy:
+      dest:  "{{build_path}}/Dockerfile"
+      content: |
+        FROM node:4.6.0-wheezy
+        RUN mkdir -p /app
+        COPY bundle/ /app/
+        COPY settings.json /app/settings.json
+
+        WORKDIR /app/programs/server
+        # rebuild if needed https://github.com/kadirahq/meteord/blob/master/base/scripts/run_app.sh#L26
+        RUN npm install 
+
+        WORKDIR /app
+        ENV PORT 80
+        EXPOSE 80
+        CMD ["/bin/bash","-c","export METEOR_SETTINGS=$(cat settings.json) && node main.js"]
+

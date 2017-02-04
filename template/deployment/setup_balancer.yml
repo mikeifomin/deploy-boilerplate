@@ -1,0 +1,59 @@
+---
+ 
+- hosts: main
+  vars_files:
+    - vars.yml
+    - vars.credentials.yml
+  tasks:
+    - file: dest=/root/traefik state=directory
+    - copy:
+        dest: /root/traefik/traefik.toml
+        content: |
+          [file]
+          watch= true
+          filename = "/etc/traefik/config.toml"
+   
+    - copy:
+        dest: /root/traefik/traefik.toml
+        content: |
+          debug = true
+          [entryPoints]
+            [entryPoints.http]
+            address = ":80"
+              [entryPoints.http.redirect]
+              entryPoint = "https"
+            [entryPoints.https]
+              address = ":443"
+              [entryPoints.https.tls]
+          [docker]
+          endpoint = "unix:///var/run/docker.sock"
+          watch = true
+          [acme]
+          email = "mikeifomin@gmail.com"
+          storage = "acme.json"
+          entryPoint = "https"
+          onDemand = false
+          OnHostRule = true
+          #[file]
+          #watch = true
+    - copy:
+        dest: /root/traefik/docker-compose.yml
+        content: |
+          version: '2'
+          services:
+            traefik:
+              image: traefik:v1.1.2-alpine
+              command: --web -c /etc/traefik/traefik.toml --docker.watch --docker
+              restart: always
+              ports:
+                - "80:80"
+                - "443:443"
+                - "8080:8080"
+              volumes:
+                - "/var/run/docker.sock:/var/run/docker.sock"
+              # - "/root/traefik/acme.json:/etc/traefik/acme.json"
+                - "/root/traefik:/etc/traefik"
+    - docker_service:
+        project_src: /root/traefik
+        state: present
+        recreate: always
