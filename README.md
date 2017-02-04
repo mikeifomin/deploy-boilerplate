@@ -27,3 +27,31 @@ vitrual hosts via docker-compose and `docker network`
 ### problems
 
  1. security
+
+### zero downtime
+
+normal run: docker-compose up
+
+nginx.upstream file:
+
+  server app_node:port
+
+
+OPTION 1
+
+deploy:
+1. docker up with new names `app_node_new`
+2. wait app_node_new
+3. add upstream app_node_new
+4. wait
+5. mark old servers as down
+6. repeat all instance
+
+OPTION 2
+
+1. rename current container
+2. update upstream
+3. reload nginx
+4. docker-compose up
+
+OPTION 3
