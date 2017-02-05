@@ -1,0 +1,37 @@
+---
+  - include: facts.yml
+  - file: dest={{remote_path}} state=directory
+  - set_fact: MONGO_URL="mongodb://mongodb/{{item.global_MONGO_URL_db_name}}"
+  - set_fact: MONGO_OPTLOG_URL=MONGO_URL
+  - copy:
+      dest: "{{remote_path}}docker-compose.yml"
+      content: |
+        version: "2"
+        networks:
+          db_default: 
+            external: true
+          balancer_default: {external: true}
+          
+        services: 
+          node:
+            image: {{image_name}}
+            restart: always
+            labels:
+              - "traefik.backend={{stack_name}}"
+              - "traefik.port={{port}}"
+              - "traefik.frontend.rule=Host:{{domain}}"
+              - "traefik.frontend.entryPoints=http,https"
+              - "traefik.docker.network=balancer_default"
+            environment:
+              MONGO_URL:  {{MONGO_URL}}
+              MONGO_OPTLOG_URL: {{MONGO_OPTLOG_URL}}
+              ROOT_URL: https://{{domain}}
+            networks:
+              - default
+              - db_default
+              - balancer_default
+  - docker_service:
+      project_src: "{{remote_path}}"
+      state: present
+      scale: 
+        node: 4

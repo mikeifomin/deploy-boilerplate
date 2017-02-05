@@ -1,0 +1,13 @@
+
+version: '2'
+services:
+  mongodb:
+    image: mongo:3.2
+    restart: always
+    volumes:
+      - ./mongo/data:/data/db
+  redis:
+    image: redis:3.2
+    restart: always
+    volumes:
+      - ./redis/data:/data

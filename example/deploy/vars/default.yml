@@ -1,5 +1,0 @@
-root_apps_dir:            /root/apps
-root_balancer_dir: "{{root_apps_dir}}/balancer"
-conf_balancer_dir:      "{{root_balancer_dir}}/conf.d"
-acme_dir: "{{root_balancer_dir}}/acme"
-in_container_acme_dir: "/acme"

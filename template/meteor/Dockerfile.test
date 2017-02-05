@@ -1,0 +1,6 @@
+FROM mikeifomin/meteor-dev:1.4.2.3
+
+USER meteor
+ADD ./ /app/
+RUN meteor npm i
+RUN meteor run test

@@ -1,0 +1,18 @@
+---
+ - include: facts.yml
+ - command: "docker pull {{image_name}}"
+   ignore_errors: true
+   register: res
+ - set_fact: image_not_exists={{res.stderr.find('not found') != -1}}
+ - debug: msg="Skip build. image {{image_name}} exists"
+   when: not image_not_exists
+ - when: is_meteor is defined and image_not_exists
+   include: build_meteor.yml
+         
+ - shell: "docker build -t {{image_name}} {{build_path}}"
+   when: image_not_exists
+ - shell: "docker push {{image_name}}"
+   when: image_not_exists
+
+
+

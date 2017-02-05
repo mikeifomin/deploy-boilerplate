@@ -1,3 +1,0 @@
-*.retry
-inventory
-vars/credentials.yml

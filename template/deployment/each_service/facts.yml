@@ -1,0 +1,12 @@
+---
+ - set_fact: source_path="{{abs_path}}{{item.dir}}"
+ - set_fact: build_path={{source_path}}
+ - set_fact: package_json="{{ lookup('file',source_path+'/package.json') | from_json }}"
+ - set_fact: service_name={{package_json['name']}}
+ - set_fact: version={{package_json['version']}}
+ - set_fact: image_name="{{registry}}/{{service_name}}:{{version}}"
+ - set_fact: is_meteor={{ package_json['dependencies']['meteor-node-stubs'] }}
+ - set_fact: remote_path="{{remote_root}}{{project_name}}/{{service_name}}/" 
+ - set_fact: domain={{item.get('domain')}}
+ - set_fact: port={{item.get('port',80)}}
+ - set_fact: stack_name="{{project_name}}_{{service_name}}"

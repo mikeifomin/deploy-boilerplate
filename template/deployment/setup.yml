@@ -1,0 +1,19 @@
+
+---
+- hosts: all
+  gather_facts: no
+  pre_tasks:
+    - raw: rm -rf /var/lib/dpkg/lock
+    - raw: apt-get update -qq
+    - raw: apt-get install -qq python-minimal
+
+- hosts: main
+  vars_files:
+    - vars.yml
+    - vars.credentials.yml
+  roles:
+    - angstwad.docker_ubuntu
+  tasks:
+    - include: setup/init.yml
+    - include: setup/db.yml
+    - include: setup/balancer.yml

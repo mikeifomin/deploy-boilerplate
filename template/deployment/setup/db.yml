@@ -1,0 +1,8 @@
+- file: dest=/root/db/mongo/data state=directory
+- file: dest=/root/db/redis/data state=directory
+- template:
+    src: db.docker-compose.yml
+    dest: /root/db/docker-compose.yml
+- docker_service:
+    project_src: /root/db/
+    state: present
