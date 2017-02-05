@@ -3,6 +3,7 @@
 - hosts: localhost
   vars_files:
     - vars.yml
+    - vars.credentials.yml
   vars:
     force: false
   tasks:
