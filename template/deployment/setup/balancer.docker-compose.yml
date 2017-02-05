@@ -1,0 +1,15 @@
+version: '2'
+services:
+  traefik:
+    image: traefik:v1.1.2-alpine
+    command: --web -c /etc/traefik/traefik.toml --docker.watch --docker --retry
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    # - "/root/traefik/acme.json:/etc/traefik/acme.json"
+      - "/root/balancer:/etc/traefik"
+

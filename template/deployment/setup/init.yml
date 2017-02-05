@@ -1,0 +1,29 @@
+- apt: name={{item}}
+  with_items:
+    - tmux
+    - curl
+    - tree
+    - htop
+    - mosh
+    - vim
+    - zsh
+    - git
+    - software-properties-common
+    - jq
+    # fix until ansible will not update docker_service        
+    #   - pip: name=docker state=absent
+    #   - pip: name=docker-py state=absent
+    #   - pip: name=docker
+- name: Log into private registry
+  docker_login:
+    registry: "{{registry}}"
+    username: "{{registry_user}}"
+    password: "{{registry_pass}}"
+    reauthorize: yes    
+- copy:
+    dest: "/etc/docker/daemon.json"
+    content: |
+      {"experimental":true}
+- service: 
+    name: docker
+    state: restarted

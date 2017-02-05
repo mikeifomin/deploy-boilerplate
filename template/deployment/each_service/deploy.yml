@@ -10,7 +10,7 @@
         networks:
           db_default: 
             external: true
-          traefik_default: {external: true}
+          balancer_default: {external: true}
           
         services: 
           node:
@@ -21,7 +21,7 @@
               - "traefik.port={{port}}"
               - "traefik.frontend.rule=Host:{{domain}}"
               - "traefik.frontend.entryPoints=http,https"
-              - "traefik.docker.network=traefik_default"
+              - "traefik.docker.network=balancer_default"
             environment:
               MONGO_URL:  {{MONGO_URL}}
               MONGO_OPTLOG_URL: {{MONGO_OPTLOG_URL}}
@@ -29,7 +29,7 @@
             networks:
               - default
               - db_default
-              - traefik_default
+              - balancer_default
   - docker_service:
       project_src: "{{remote_path}}"
       state: present

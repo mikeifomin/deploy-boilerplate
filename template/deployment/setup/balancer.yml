@@ -1,0 +1,11 @@
+- file: dest=/root/balancer state=directory
+- template:
+    src: balancer.traefik.toml
+    dest: /root/balancer/traefik.toml
+- template:
+    src: balancer.docker-compose.yml
+    dest: /root/balancer/docker-compose.yml
+- docker_service:
+    project_src: /root/balancer
+    state: present
+    recreate: always
