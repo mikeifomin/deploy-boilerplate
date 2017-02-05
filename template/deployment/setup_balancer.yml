@@ -43,7 +43,7 @@
           services:
             traefik:
               image: traefik:v1.1.2-alpine
-              command: --web -c /etc/traefik/traefik.toml --docker.watch --docker
+              command: --web -c /etc/traefik/traefik.toml --docker.watch --docker --retry
               restart: always
               ports:
                 - "80:80"
